@@ -130,6 +130,9 @@ def tickFix(notes, tickCounts):
 
 def main():
 
+	#Variable for adding a set extra offset if the offset list is not used
+	addedOffset = 0
+
 	#Try to get offset list
 	offsetList = ""
 	try:
@@ -194,7 +197,7 @@ def main():
 			tickCounts[i][0] = float(tick[0])/4
 
 		#Get offset
-		offset = float(getField(indata, "#OFFSET:"))*1000
+		offset = float(getField(indata, "#OFFSET:"))*1000+addedOffset
 
 		if (offsetList):
 			for off in offsetList:
