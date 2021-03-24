@@ -5,6 +5,8 @@ import time
 def getField(data, fieldName):
 	table = ""
 	start = data.find(fieldName)+len(fieldName)
+	if start-len(fieldName) == -1:
+		return table
 	end = data.find(";", start)
 	for i in range(start, end):
 		table += data[i]
@@ -187,7 +189,7 @@ def main():
 
 		#Get tick counts
 		tickCounts = getField(indata, "#TICKCOUNTS:")
-
+		#print(tickCounts)
 		for i, tick in enumerate(tickCounts):
 			tickCounts[i][0] = float(tick[0])/4
 
@@ -291,7 +293,8 @@ def main():
 
 				
 		f.close()
-	
+	print("Done converting!")
+	time.sleep(2)
 	
 
 
