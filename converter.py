@@ -123,6 +123,8 @@ def tickFix(notes, tickCounts):
 			while loop:
 				if getSplit(notes[measure]) < float(tick[1]):
 					doubleMeasure(measure, notes)
+					if getSplit(notes[measure]) >= 128:
+						loop = 0
 				else:
 					loop = 0
 	return notes
