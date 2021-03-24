@@ -108,8 +108,8 @@ def tickFix(notes, tickCounts):
 	tickCounter = 0
 	for tickId, tick in enumerate(tickCounts):
 		tickCounter += 1
-		print(f"{tickCounter}, {tick[1]}")
-		print(f"{tickId}, {len(tickCounts)}")
+		#print(f"{tickCounter}, {tick[1]}")
+		#print(f"{tickId}, {len(tickCounts)}")
 		if tickId != len(tickCounts) - 1:
 			maxMeasure = int(tickCounts[tickId+1][0])
 		else:
@@ -204,6 +204,7 @@ def main():
 		for i, stop in enumerate(stops):
 			stops[i][0] = float(stop[0])/4
 			stops[i][1] = float(stop[1])*1000
+		
 
 
 		#Get the stepstyle
@@ -231,18 +232,20 @@ def main():
 		
 		
 		bpmCounter = 0
-		split = 0
+		split = getSplit(notes[0])
 		actualNoteCount = 0
 		actualNoteOffset = 0
 		actualNote = 0
 		stopCounter = 0
-		splitTime = True
+		splitTime = False
+
 
 
 		#Start writing the file
 		f = open(outfile, "w")
 
 		f.write(f":Format=1\n:Mode={stepstyle}\n")
+		f.write(splitTemplate(bpms[0][1], getSplit(notes[0]), offset) + "\n")
 
 		#Loop through the measures
 		for measureId, measure in enumerate(notes):
@@ -272,7 +275,7 @@ def main():
 				#Adds stops
 				if stops:
 					if trueBeat == stops[stopCounter][0]:
-						print(f"STOP: {stopCounter}, {trueBeat}, {stops[stopCounter][0]}, {stops[stopCounter][1]}")
+						#print(f"STOP: {stopCounter}, {trueBeat}, {stops[stopCounter][0]}, {stops[stopCounter][1]}")
 						f.write(splitTemplate(bpms[bpmCounter][1], split, stops[stopCounter][1]) + "\n")
 						if stopCounter != len(stops)-1:
 							stopCounter += 1
@@ -280,7 +283,7 @@ def main():
 				#New bpm for next beat
 				if len(bpms) != bpmCounter+1:
 					if trueBeat == bpms[bpmCounter+1][0]:
-						print(f"BPM: {bpmCounter}, {trueBeat}, {bpms[bpmCounter+1][0]}, {bpms[bpmCounter+1][1]}")
+						#print(f"BPM: {bpmCounter}, {trueBeat}, {bpms[bpmCounter+1][0]}, {bpms[bpmCounter+1][1]}")
 						splitTime = True
 						bpmCounter += 1
 
