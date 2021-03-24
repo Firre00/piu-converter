@@ -95,15 +95,16 @@ def addHolds(notes):
 def bpmMeasure(notes, bpm):
 	measureIndex = int(bpm[0])
 	decimal = bpm[0] - int(bpm[0])
-	notInt = 1
+	notInt = True
 	while notInt:
+
+		if getSplit(notes[measureIndex]) >= 96:
+			break
+
 		if (decimal * getSplit(notes[measureIndex])).is_integer():
-			notInt = 0
+			notInt = False
 		else:
 			notes = doubleMeasure(measureIndex, notes)
-
-		if getSplit(notes[measureIndex]) >= 128:
-			break
 	return notes
 
 def tickFix(notes, tickCounts):
@@ -190,7 +191,13 @@ def main():
 		bpms = getField(indata, "#BPMS:")
 
 		for i, bpm in enumerate(bpms):
-			bpms[i][0] = float(bpm[0])/4
+			if (float(bpm[0]) * 128).is_integer():
+				bpms[i][0] = float(bpm[0])/4
+			else:
+				print("YES")
+				print(float(bpm[0])-0.0005)
+				bpms[i][0] = (float(bpm[0])-0.0005)/4
+				
 
 		#Get tick counts
 		tickCounts = getField(indata, "#TICKCOUNTS:")
