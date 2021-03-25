@@ -99,6 +99,8 @@ def bpmMeasure(notes, bpm):
 	while notInt:
 
 		if getSplit(notes[measureIndex]) >= 96:
+			print(f"Something probably went wrong with a bpm change in measure: {measureIndex}")
+			time.sleep(1)
 			break
 
 		if (decimal * getSplit(notes[measureIndex])).is_integer():
