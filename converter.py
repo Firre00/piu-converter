@@ -1,6 +1,8 @@
 import sys
 import time
 
+error = False
+
 #Returns the searched field data
 def getField(data, fieldName):
 	table = ""
@@ -93,15 +95,16 @@ def addHolds(notes):
 
 #Given a bpm, doubles the measure of the bpm untill it fits
 def bpmMeasure(notes, bpm):
+	global error
 	measureIndex = int(bpm[0])
 	decimal = bpm[0] - int(bpm[0])
 	notInt = True
 	while notInt:
 
-		if getSplit(notes[measureIndex]) >= 96:
-			print(f"Something probably went wrong with a bpm change in measure: {measureIndex}")
-			time.sleep(1)
-			break
+		if getSplit(notes[measureIndex]) > 96:
+			#print(f"Something probably went wrong with a bpm change in measure: {measureIndex}\n")
+			error = True
+			notInt = False
 
 		if (decimal * getSplit(notes[measureIndex])).is_integer():
 			notInt = False
@@ -126,7 +129,7 @@ def tickFix(notes, tickCounts):
 			while loop:
 				if getSplit(notes[measure]) < float(tick[1]):
 					doubleMeasure(measure, notes)
-					if getSplit(notes[measure]) >= 128:
+					if getSplit(notes[measure]) >= 96:
 						loop = 0
 				else:
 					loop = 0
@@ -134,7 +137,7 @@ def tickFix(notes, tickCounts):
 
 
 def main():
-
+	global error
 	#Variable for adding a set extra offset if the offset list is not used
 	addedOffset = 0
 
@@ -165,9 +168,8 @@ def main():
 			infile = sys.argv[file]
 
 		outfile = infile.replace(".ssc", ".ucs")
-
 		if infile == outfile:
-			print(f"File: {infile} is not .ssc")
+			print(f"\nFile: {infile} is not .ssc\n")
 			time.sleep(2)
 			continue
 
@@ -188,6 +190,7 @@ def main():
 					notes[measure][beat] = notes[measure][beat].replace(char[0], char[1])
 
 
+		#To get thirds and multiples of them, multiply then add 0.001
 
 		#Get bpms
 		bpms = getField(indata, "#BPMS:")
@@ -196,8 +199,8 @@ def main():
 			if (float(bpm[0]) * 128).is_integer():
 				bpms[i][0] = float(bpm[0])/4
 			else:
-				print("YES")
-				print(float(bpm[0])-0.0005)
+				#print("YES")
+				#print(float(bpm[0])-0.0005)
 				bpms[i][0] = (float(bpm[0])-0.0005)/4
 				
 
@@ -217,9 +220,13 @@ def main():
 
 		#Get stops
 		stops = getField(indata, "#STOPS:")
-		for i, stop in enumerate(stops):
-			stops[i][0] = float(stop[0])/4
-			stops[i][1] = float(stop[1])*1000
+		if stops:
+			print("\nERROR: This chart includes stops, pump it up does not suport stops via ucs files\nYour chart is probably gonna desync if you play it in the game\n")
+			error = True
+			for i, stop in enumerate(stops):
+				stops[i][0] = float(stop[0])/4
+				stops[i][1] = float(stop[1])*1000
+		
 		
 
 
@@ -296,19 +303,33 @@ def main():
 						if stopCounter != len(stops)-1:
 							stopCounter += 1
 
+				#print(trueBeat)
+
 				#New bpm for next beat
 				if len(bpms) != bpmCounter+1:
+					if trueBeat > bpms[bpmCounter+1][0]:
+						print(f"ERROR: Something probably went wrong with a bpm change in measure: {measureId}")
+						error = True
+						splitTime = True
+						bpmCounter += 1
+
 					if trueBeat == bpms[bpmCounter+1][0]:
 						#print(f"BPM: {bpmCounter}, {trueBeat}, {bpms[bpmCounter+1][0]}, {bpms[bpmCounter+1][1]}")
 						splitTime = True
 						bpmCounter += 1
 
+					
+
+
 				f.write(beat + "\n")
 
 				
 		f.close()
-	print("Done converting!")
+	print("Done converting!\n")
 	time.sleep(2)
+	if error:
+		print("One or more errors occured during conversion, the chart might still be fine\nIf there is something wrong, try moving stuff in the measure were the problem occured\n")
+		input("Press enter to close...")
 	
 
 
