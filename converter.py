@@ -1,5 +1,12 @@
 import sys
 import time
+import traceback
+
+#TODO
+#
+#Add bpm changes on thirds
+#Strip " from file names
+
 
 error = False
 
@@ -100,11 +107,8 @@ def bpmMeasure(notes, bpm):
 	decimal = bpm[0] - int(bpm[0])
 	notInt = True
 	while notInt:
-
 		if getSplit(notes[measureIndex]) > 96:
-			#print(f"Something probably went wrong with a bpm change in measure: {measureIndex}\n")
-			error = True
-			notInt = False
+			break
 
 		if (decimal * getSplit(notes[measureIndex])).is_integer():
 			notInt = False
@@ -112,6 +116,7 @@ def bpmMeasure(notes, bpm):
 			notes = doubleMeasure(measureIndex, notes)
 	return notes
 
+#Inreases the ticks in all measures of the chart to match the tick list
 def tickFix(notes, tickCounts):
 	tickCounter = 0
 	for tickId, tick in enumerate(tickCounts):
@@ -125,7 +130,6 @@ def tickFix(notes, tickCounts):
 
 		for measure in range(int(tick[0]), maxMeasure):
 			loop = 1
-			#print(measure)
 			while loop:
 				if getSplit(notes[measure]) < float(tick[1]):
 					doubleMeasure(measure, notes)
@@ -173,7 +177,7 @@ def main():
 			time.sleep(2)
 			continue
 
-		print(f"Converting {infile} to {outfile}")
+		print(f"Converting {infile} to {outfile}\n")
 
 		f = open(infile, "r")
 		indata = f.read()
@@ -206,7 +210,6 @@ def main():
 
 		#Get tick counts
 		tickCounts = getField(indata, "#TICKCOUNTS:")
-		#print(tickCounts)
 		for i, tick in enumerate(tickCounts):
 			tickCounts[i][0] = float(tick[0])/4
 
@@ -309,12 +312,20 @@ def main():
 				if len(bpms) != bpmCounter+1:
 					if trueBeat > bpms[bpmCounter+1][0]:
 						print(f"ERROR: Something probably went wrong with a bpm change in measure: {measureId}")
+						print(f"ERROR: Should have placed on beat: {(bpms[bpmCounter+1][0]-measureId)*4} but placed on beat: {(trueBeat-measureId)*4}\n")
 						error = True
 						splitTime = True
 						bpmCounter += 1
-
+					#print(trueBeat)
 					if trueBeat == bpms[bpmCounter+1][0]:
 						#print(f"BPM: {bpmCounter}, {trueBeat}, {bpms[bpmCounter+1][0]}, {bpms[bpmCounter+1][1]}")
+						if float(bpms[bpmCounter+1][1]) < 1:
+							print(f"ERROR: BPM in measure: {measureId} beat: {(trueBeat-measureId)*4} is less than 1, this chart won't start in pump it up\n")
+							error = True
+						elif float(bpms[bpmCounter+1][1]) > 999:
+							print(f"ERROR: BPM in measure: {measureId} beat: {(trueBeat-measureId)*4} is more than 999, this chart won't start in pump it up\n")
+							error = True
+
 						splitTime = True
 						bpmCounter += 1
 
@@ -326,7 +337,6 @@ def main():
 				
 		f.close()
 	print("Done converting!\n")
-	time.sleep(2)
 	if error:
 		print("One or more errors occured during conversion, the chart might still be fine\nIf there is something wrong, try moving stuff in the measure were the problem occured\n")
 		input("Press enter to close...")
@@ -334,4 +344,8 @@ def main():
 
 
 if __name__ == '__main__':
-	main()
+	try:
+		main()
+	except:
+		traceback.print_exception(sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2])
+		input("\nPress enter to close...")
