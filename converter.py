@@ -4,8 +4,9 @@ import traceback
 
 #TODO
 #
-#Add bpm changes on thirds
 #Strip " from file names
+#Change bpm in the middle of a measure
+#Add blinkink holds effect
 
 
 error = False
@@ -47,8 +48,8 @@ def getSplit(measure):
 
 #Returns a template to print for ucs files
 def splitTemplate(bpm, split, delay = 0, beat = 4):
-	template = f""":BPM={bpm}
-:Delay={delay}
+	template = f""":BPM={bpm.replace(".", ",")}
+:Delay={str(delay).replace(".", ",")}
 :Beat={beat}
 :Split={split}"""
 	return template
@@ -166,11 +167,12 @@ def main():
 		infile = input("Input file: ")
 		loop = 2
 
-	#Start looping throught the files
+	#Start looping through the files
 	for file in range(1, loop):
 		if loop > 2:
 			infile = sys.argv[file]
 
+		infile = infile.replace('"', "")
 		outfile = infile.replace(".ssc", ".ucs")
 		if infile == outfile:
 			print(f"\nFile: {infile} is not .ssc\n")
@@ -205,7 +207,8 @@ def main():
 			else:
 				#print("YES")
 				#print(float(bpm[0])-0.0005)
-				bpms[i][0] = (float(bpm[0])-0.0005)/4
+				#bpms[i][0] = (float(bpm[0])-0.0005)/4
+				bpms[i][0] = (round((float(bpm[0])*192))/192)/4
 				
 
 		#Get tick counts
