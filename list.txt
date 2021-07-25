@@ -191,7 +191,7 @@ CS305.ucs: 230
 CS329.ucs: 105
 CS122.ucs: 65
 CS227.ucs: 67
-CS028.ucs: 645
+CS028.ssc: ION:0.83;
 CS060.ucs: 112.5
 CS296.ucs: 570
 CS263.ucs: 78
